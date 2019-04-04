@@ -1,11 +1,10 @@
 package com.tuemu.money.transfer.service;
 
-import java.util.List;
 import java.util.UUID;
 
-import com.tuemu.money.transfer.model.Account;
+import javax.ws.rs.core.Response;
 
 public interface AccountApiService {
-	public List<Account> getAccounts(UUID userToken);
-	public List<Account> getAccountById(UUID userToken, long accountId);
+	public Response getAccounts(UUID userToken);
+	public Response getAccountById(UUID userToken, long accountId);
 }
