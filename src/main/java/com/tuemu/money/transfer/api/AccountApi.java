@@ -3,8 +3,10 @@ package com.tuemu.money.transfer.api;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -19,9 +21,9 @@ public class AccountApi {
 	
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccounts() {
+    public Response getAccounts(@HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
     	System.out.println("START getAccounts()");
-    	UUID userToken = UUID.randomUUID();
+    	UUID userToken = UUID.fromString(authHeader);
     	AccountApiService accountService = new AccountApiServiceImpl();
     	return accountService.getAccounts(userToken);
     }

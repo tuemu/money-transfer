@@ -20,11 +20,12 @@ public class TransferApiServiceImpl implements TransferApiService {
 
 	private final AuthDummyService auth = new AuthDummyServiceImpl();
 	private final TransferDao transferDao = new TransferDao();
+	private final AccountApiServiceForBackend accountService = new AccountApiServiceImpl();
 	
 
 	@Override
 	public Response postTransfer(UUID userToken, long frAccountId, long toAccountId, BigDecimal ammount) {
-		long userId = auth.getUserIdByToken(userToken);
+		long userId = auth.getSession(userToken).getUserId();
 				
 		List<Transfer> responseList = transferDao.postTransfers(userId, frAccountId, toAccountId, ammount);
 
@@ -37,10 +38,15 @@ public class TransferApiServiceImpl implements TransferApiService {
     			.type(MediaType.APPLICATION_JSON)
     			.build();
 	}
+	
+	private boolean isWithdrawalPossible(long targetAccountId, BigDecimal ammount) {
+		
+		return false;
+	}
 
 	@Override
 	public Response putTransferById(UUID userToken, UUID transferId, TransferStatus transferStatus) {
-		long userId = auth.getUserIdByToken(userToken);
+		long userId = auth.getSession(userToken).getUserId();
 		if(userId == 0) {
 			return Response.status(Status.UNAUTHORIZED)
 	    			.header("yourHeaderName", "yourHeaderValue")
@@ -48,14 +54,8 @@ public class TransferApiServiceImpl implements TransferApiService {
 	    			.build();
 		}
 		
-		Optional<Transfer> updatedTransfer = transferDao.putTransfers(transferId, transferStatus);
-		if (updatedTransfer.isPresent()) {
-	    	System.out.println(" The transfer is updated.");
-			return Response.status(Status.NO_CONTENT)
-	    			.header("yourHeaderName", "yourHeaderValue")
-	    			.type(MediaType.APPLICATION_JSON)
-	    			.build();
-		} else {
+		Optional<Transfer> transfer = transferDao.findTransferById(transferId);
+		if(!transfer.isPresent()) {
 	    	System.out.println(" The transfer is NOTHING.");
 			return Response.status(Status.NOT_FOUND)
 					.entity(null)
@@ -63,12 +63,63 @@ public class TransferApiServiceImpl implements TransferApiService {
 	    			.type(MediaType.APPLICATION_JSON)
 	    			.build();
 		}
+		
+		if (transfer.get().getTransferStatus().equals(TransferStatus.PLACED) 
+				&& transferStatus.equals(TransferStatus.APPROVED)) {
+			// In case Transfer Status is going to change from PLACED to APPROVED 
+			if(!transferMoney(transfer.get())) { // Do the transfer
+		    	System.out.println(" The transfer is Failar.");
+				return Response.status(Status.INTERNAL_SERVER_ERROR)
+						.entity(null)
+		    			.header("yourHeaderName", "yourHeaderValue")
+		    			.type(MediaType.APPLICATION_JSON)
+		    			.build();
+			}
+		}
+		
+		transfer.get().setTransferStatus(transferStatus);
+		
+    	System.out.println(" The transfer is updated.");
+		return Response.status(Status.NO_CONTENT)
+    			.header("yourHeaderName", "yourHeaderValue")
+    			.type(MediaType.APPLICATION_JSON)
+    			.build();
+
+		
+//		Optional<Transfer> updatedTransfer = transferDao.putTransfers(transferId, transferStatus);
+//		if (updatedTransfer.isPresent()) {
+//	    	System.out.println(" The transfer is updated.");
+//			return Response.status(Status.NO_CONTENT)
+//	    			.header("yourHeaderName", "yourHeaderValue")
+//	    			.type(MediaType.APPLICATION_JSON)
+//	    			.build();
+//		} else {
+//	    	System.out.println(" The transfer is NOTHING.");
+//			return Response.status(Status.NOT_FOUND)
+//					.entity(null)
+//	    			.header("yourHeaderName", "yourHeaderValue")
+//	    			.type(MediaType.APPLICATION_JSON)
+//	    			.build();
+//		}
+	}
+	
+	private boolean transferMoney(Transfer transfer) {
+		if(!accountService.hasAccount(transfer.getFrAccountId()) 
+				|| !accountService.hasAccount(transfer.getToAccountId())) {
+			System.out.println(" Either or Neither of account is NOT exist.");
+			return false;
+		}
+		return accountService.transferMoney(
+				transfer.getFrAccountId(), 
+				transfer.getToAccountId(), 
+				transfer.getAmmount());
 	}
 
 	@Override
 	public Response getTransfers(UUID userToken) {
-		long userId = auth.getUserIdByToken(userToken);
-		
+		long userId = auth.getSession(userToken).getUserId();
+    	System.out.println("userId: " + userId);
+
 		List<Transfer> responseList = transferDao.getTransfers(userId);
 		
 		TransfersResponse response = new TransfersResponse();

@@ -12,7 +12,7 @@ import com.tuemu.money.transfer.model.Transfer;
 import com.tuemu.money.transfer.model.Transfer.TransferStatus;
 
 public class TransferDao {
-	public static long USER_ID_1 = 1234;
+	public static long USER_ID_1 = 1000;
 	
 	private static long FR_ACCOUNT_ID_11 = 12340001;
 	private static long TO_ACCOUNT_ID_11 = 22340001;
@@ -45,7 +45,7 @@ public class TransferDao {
 		return transfer;
 	}
 
-	private Optional<Transfer> findTransferById(UUID transferId) {
+	public Optional<Transfer> findTransferById(UUID transferId) {
 		return transferTable.stream()
 				.filter(a -> a.getTransferId().equals(transferId))
 				.findFirst();
