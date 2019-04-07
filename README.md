@@ -8,8 +8,23 @@ The API provide several features to do money transfers.
 
 ## Requirements
 
-- Tomcat as API server
+- Maven
 - JRE 8
+- Tomcat as API server
+
+
+## Prepearation 
+
+```
+1. Run maven
+    mvn clean package
+
+2. Deploy on server
+    Deploy `target/money-transfer.war` on tomcat
+
+3. Start Tomcat
+```
+
 
 ## API URI
 
