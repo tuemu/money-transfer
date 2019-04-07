@@ -1,5 +1,6 @@
 package com.tuemu.money.transfer;
 
+import javax.jws.soap.InitParam;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;

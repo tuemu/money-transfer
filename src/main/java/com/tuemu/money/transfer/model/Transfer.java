@@ -4,34 +4,30 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Transfer
  */
-@Data
-@Builder
-@XmlRootElement
+@Builder()
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@Setter
+@Getter
 public class Transfer   {
-  @XmlElement
   private long userId;
-  @XmlElement
   @Builder.Default
   private UUID transferId = UUID.randomUUID();
-  @XmlElement
   private long frAccountId;
-  @XmlElement
   private long toAccountId;
-  @XmlElement
   private BigDecimal ammount;
-  @XmlElement
   @Builder.Default
   private Date transferDate = new Date();
-  @XmlElement
   @Builder.Default
   private TransferStatus transferStatus = TransferStatus.PLACED;
 
@@ -47,11 +43,6 @@ public class Transfer   {
 
     TransferStatus(String value) {
       this.value = value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
     }
 
     public static TransferStatus fromValue(String text) {

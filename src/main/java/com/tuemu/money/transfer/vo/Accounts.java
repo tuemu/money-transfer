@@ -9,7 +9,6 @@ import com.tuemu.money.transfer.model.Account;
 import lombok.Value;
 
 @Value
-@XmlRootElement
 public class Accounts {
 	
 	private List<Account> accounts;

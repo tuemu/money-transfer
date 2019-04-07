@@ -2,6 +2,7 @@ package com.tuemu.money.transfer.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
@@ -13,8 +14,7 @@ import com.tuemu.money.transfer.model.Transfer;
 import com.tuemu.money.transfer.model.Transfer.TransferStatus;
 import com.tuemu.money.transfer.service.auth.AuthDummyService;
 import com.tuemu.money.transfer.service.auth.AuthDummyServiceImpl;
-import com.tuemu.money.transfer.vo.Accounts;
-import com.tuemu.money.transfer.vo.Transfers;
+import com.tuemu.money.transfer.vo.TransfersResponse;
 
 public class TransferApiServiceImpl implements TransferApiService {
 
@@ -28,9 +28,10 @@ public class TransferApiServiceImpl implements TransferApiService {
 				
 		List<Transfer> responseList = transferDao.postTransfers(userId, frAccountId, toAccountId, ammount);
 
-		Transfers response = new Transfers(responseList);
+		TransfersResponse response = new TransfersResponse();
+		response.setTransfers(responseList);
 		
-		return Response.status(Status.OK)
+		return Response.status(Status.CREATED)
 				.entity(response)
     			.header("yourHeaderName", "yourHeaderValue")
     			.type(MediaType.APPLICATION_JSON)
@@ -38,10 +39,30 @@ public class TransferApiServiceImpl implements TransferApiService {
 	}
 
 	@Override
-	public Response putTransferById(UUID userToken, UUID transferId, long frAccountId, long toAccountId,
-			BigDecimal ammount, TransferStatus transferStatus) {
-		// TODO Auto-generated method stub
-		return null;
+	public Response putTransferById(UUID userToken, UUID transferId, TransferStatus transferStatus) {
+		long userId = auth.getUserIdByToken(userToken);
+		if(userId == 0) {
+			return Response.status(Status.UNAUTHORIZED)
+	    			.header("yourHeaderName", "yourHeaderValue")
+	    			.type(MediaType.APPLICATION_JSON)
+	    			.build();
+		}
+		
+		Optional<Transfer> updatedTransfer = transferDao.putTransfers(transferId, transferStatus);
+		if (updatedTransfer.isPresent()) {
+	    	System.out.println(" The transfer is updated.");
+			return Response.status(Status.NO_CONTENT)
+	    			.header("yourHeaderName", "yourHeaderValue")
+	    			.type(MediaType.APPLICATION_JSON)
+	    			.build();
+		} else {
+	    	System.out.println(" The transfer is NOTHING.");
+			return Response.status(Status.NOT_FOUND)
+					.entity(null)
+	    			.header("yourHeaderName", "yourHeaderValue")
+	    			.type(MediaType.APPLICATION_JSON)
+	    			.build();
+		}
 	}
 
 	@Override
@@ -50,7 +71,8 @@ public class TransferApiServiceImpl implements TransferApiService {
 		
 		List<Transfer> responseList = transferDao.getTransfers(userId);
 		
-		Transfers response = new Transfers(responseList);
+		TransfersResponse response = new TransfersResponse();
+		response.setTransfers(responseList);
 		
 		return Response.status(Status.OK)
 				.entity(response)
