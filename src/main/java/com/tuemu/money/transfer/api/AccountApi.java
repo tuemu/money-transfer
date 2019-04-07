@@ -15,13 +15,13 @@ import com.tuemu.money.transfer.service.AccountApiServiceImpl;
  * Root resource (exposed at "myresource" path)
  */
 @Path("accounts")
-public class AccountsApi {
+public class AccountApi {
 	
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAccounts() {
+    	System.out.println("START getAccounts()");
     	UUID userToken = UUID.randomUUID();
-    	System.out.println("getAccounts is called !");
     	AccountApiService accountService = new AccountApiServiceImpl();
     	return accountService.getAccounts(userToken);
     }
@@ -30,6 +30,7 @@ public class AccountsApi {
     @Path("test")
     @Produces(MediaType.APPLICATION_JSON)
     public String getAccountsTest() {
+    	System.out.println("START getAccountsTest()");
         return "Got it233 in Accounts!";
     }
 }

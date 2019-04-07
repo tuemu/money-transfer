@@ -24,7 +24,7 @@ public class AccountApiServiceImpl implements AccountApiService {
 		long userId = auth.getUserIdByToken(userToken);
 		List<Account> responseList = accountDao.getAccounts(userId);
 
-		Accounts aa = Accounts.builder().accounts(responseList).build();
+		Accounts aa = new Accounts(responseList);
 		
 		return Response.status(Status.OK)
 				.entity(aa)

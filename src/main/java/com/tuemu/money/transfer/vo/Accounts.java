@@ -2,11 +2,14 @@ package com.tuemu.money.transfer.vo;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.tuemu.money.transfer.model.Account;
 
-import lombok.Builder;
+import lombok.Value;
 
-@Builder
+@Value
+@XmlRootElement
 public class Accounts {
 	
 	private List<Account> accounts;
